@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 app.use(cors());
@@ -57,7 +57,8 @@ async function run() {
     try {
         // database collections
         const flightTicketCollections = client.db("Travel-Ticket").collection("flightTickets");
-        const adminCollection = client.db("Travel-Ticket").collection("admin")
+        const adminCollection = client.db("Travel-Ticket").collection("admin");
+        const blogsCollection = client.db("Travel-Ticket").collection("blogs");
 
 
         // create jwt token
@@ -78,12 +79,73 @@ async function run() {
             next();
         }
 
+        // checking, is admin or not
+        app.get('/adminSecure/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            if (req.decoded.email !== email) {
+                return res.send(null);
+            }
+            const query = { email: email };
+            const result = await adminCollection.findOne(query);
+            res.send(result)
+        })
 
+
+
+
+
+        //----------------- apis for flight tickets -----------------//
         app.post('/publishFlightTicket', verifyJWT, verifyAdmin, async (req, res) => {
             const ticket = req.body;
             const result = await flightTicketCollections.insertOne(ticket);
             res.send(result);
         })
+
+        app.post('/getFlightTickets', async (req, res) => {
+            const from = req.body.from;
+            const to = req.body.to;
+            const query = { from: from, to: to };
+            const result = await flightTicketCollections.find(query).toArray();
+            res.send(result);
+        })
+
+        app.get('/searchFlightTickets/:name', async (req, res) => {
+            const toName = req.params.name;
+            const result = await flightTicketCollections.find(
+                { to: { $regex: toName, $options: 'i' } }
+            ).toArray();
+            console.log(result);
+            res.send(result);
+        })
+
+
+
+
+        //----------------- apis for blogs upload -----------------//
+        app.post('/uploadBlog', async (req, res) => {
+            const blog = req.body;
+            const result = await blogsCollection.insertOne(blog);
+            res.send(result);
+        })
+
+        app.get('/getBlogs', async (req, res) => {
+            const result = await blogsCollection.find().sort({ date: -1 }).toArray();
+            res.send(result);
+        })
+
+        app.get('/getSingleBlog/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await blogsCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.get('/popularBlogLink', async (req, res) => {
+            const result = await blogsCollection.find().sort({ date: -1 }).limit(4).toArray();
+            res.send(result);
+        })
+
+
 
 
 
