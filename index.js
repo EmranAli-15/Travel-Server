@@ -57,6 +57,7 @@ async function run() {
     try {
         // database collections
         const flightTicketCollections = client.db("Travel-Ticket").collection("flightTickets");
+        const hotelTicketCollections = client.db("Travel-Ticket").collection("hotelTickets");
         const adminCollection = client.db("Travel-Ticket").collection("admin");
         const blogsCollection = client.db("Travel-Ticket").collection("blogs");
 
@@ -104,19 +105,28 @@ async function run() {
         app.post('/getFlightTickets', async (req, res) => {
             const from = req.body.from;
             const to = req.body.to;
-            const query = { from: from, to: to };
+            const query = { from: { $regex: from, $options: 'i' }, to: { $regex: to, $options: 'i' } };
             const result = await flightTicketCollections.find(query).toArray();
             res.send(result);
         })
 
-        app.get('/searchFlightTickets/:name', async (req, res) => {
-            const toName = req.params.name;
-            const result = await flightTicketCollections.find(
-                { to: { $regex: toName, $options: 'i' } }
-            ).toArray();
-            console.log(result);
+
+
+
+        //----------------- apis for hotel tickets -----------------//
+        app.post('/publishHotelTicket', async (req, res) => {
+            const data = req.body;
+            const result = await hotelTicketCollections.insertOne(data);
             res.send(result);
         })
+
+        app.get('/getHotelTickets/:name', async (req, res) => {
+            const name = req.params.name;
+            const query = { place: { $regex: name, $options: 'i' } }
+            const result = await hotelTicketCollections.find(query).toArray();
+            res.send(result);
+        })
+
 
 
 
