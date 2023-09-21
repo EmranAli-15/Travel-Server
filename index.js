@@ -155,7 +155,23 @@ async function run() {
             res.send(result);
         })
 
-        app.patch('/updateBlog')
+        app.patch('/updateBlog', async (req, res) => {
+            const data = req.body;
+            const id = data.id;
+            const title = data.title;
+            const details = data.details;
+            const img = data.img;
+            const query = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    title: title,
+                    details: details,
+                    img: img
+                }
+            }
+            const result = await blogsCollection.updateOne(query, updateDoc);
+            res.send(result);
+        })
 
         app.delete('/deleteBlog/:id', async (req, res) => {
             const id = req.params.id;
