@@ -131,7 +131,7 @@ async function run() {
 
 
 
-        //----------------- apis for blogs upload -----------------//
+        //----------------- apis for blogs -----------------//
         app.post('/uploadBlog', async (req, res) => {
             const blog = req.body;
             const result = await blogsCollection.insertOne(blog);
@@ -152,6 +152,15 @@ async function run() {
 
         app.get('/popularBlogLink', async (req, res) => {
             const result = await blogsCollection.find().sort({ date: -1 }).limit(4).toArray();
+            res.send(result);
+        })
+
+        app.patch('/updateBlog')
+
+        app.delete('/deleteBlog/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await blogsCollection.deleteOne(query);
             res.send(result);
         })
 
