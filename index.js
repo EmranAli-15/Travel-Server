@@ -12,11 +12,6 @@ app.use(express.json());
 
 
 
-// DB_USER=Travel-Ticket
-// DB_PASS=pEsM2yVlbgzfaJOy
-// ACCESS_TOKEN=90befc5b815a61d45a3d9412a1fa4b84d22cb948017d6bdbfe87062600208ccf369257da30f9a3317ca8ce3af18436582a47775138e0bc8cfceca64bc397962a
-
-
 
 
 
