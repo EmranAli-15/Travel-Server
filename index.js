@@ -89,6 +89,13 @@ async function run() {
 
 
         //----------------- apis for flight tickets -----------------//
+        app.get('/getSingleFlight/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await flightTicketCollections.findOne(query);
+            res.send(result);
+        })
+
         app.post('/publishFlightTicket', verifyJWT, verifyAdmin, async (req, res) => {
             const ticket = req.body;
             const result = await flightTicketCollections.insertOne(ticket);
