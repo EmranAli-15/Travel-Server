@@ -97,6 +97,18 @@ async function run() {
             res.send(result);
         })
 
+        
+        app.get('/bookedUserFlightTickets/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await flightBookingCollections.findOne(query);
+            const idsArr = user.ids;
+            const objectIdsArr = idsArr.map(id => new ObjectId(id));
+            const result = await flightTicketCollections.find({ _id: { $in: objectIdsArr } }).toArray();
+            res.send(result)
+        })
+
+
         app.post('/publishFlightTicket', verifyJWT, verifyAdmin, async (req, res) => {
             const ticket = req.body;
             const result = await flightTicketCollections.insertOne(ticket);
