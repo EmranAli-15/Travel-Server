@@ -50,6 +50,7 @@ async function run() {
     try {
         // database collections
         const flightTicketCollections = client.db("Travel-Ticket").collection("flightTickets");
+        const flightBookingCollections = client.db("Travel-Ticket").collection("flightBookings");
         const hotelTicketCollections = client.db("Travel-Ticket").collection("hotelTickets");
         const adminCollection = client.db("Travel-Ticket").collection("admin");
         const blogsCollection = client.db("Travel-Ticket").collection("blogs");
@@ -89,9 +90,9 @@ async function run() {
 
 
         //----------------- apis for flight tickets -----------------//
-        app.get('/getSingleFlight/:id', async(req, res) => {
+        app.get('/getSingleFlight/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await flightTicketCollections.findOne(query);
             res.send(result);
         })
@@ -108,6 +109,34 @@ async function run() {
             const query = { from: { $regex: from, $options: 'i' }, to: { $regex: to, $options: 'i' } };
             const result = await flightTicketCollections.find(query).toArray();
             res.send(result);
+        })
+
+        app.post('/bookedFlight', async (req, res) => {
+            const data = req.body;
+            const email = data.email;
+            const name = data.name;
+            const flightId = data.flightId;
+
+            const query = { email: email };
+            const queryResult = await flightBookingCollections.findOne(query);
+            if (!queryResult) {
+                const uploadNewData = { email: email, name: name, ids: [flightId] };
+                const uploadResult = await flightBookingCollections.insertOne(uploadNewData);
+                res.send(uploadResult);
+            }
+            else {
+                const idsArr = queryResult.ids;
+                const newIdsArr = [...idsArr, flightId];
+                const query = { email: email };
+                const updateDoc = {
+                    $set: {
+                        name: name,
+                        ids: newIdsArr
+                    }
+                }
+                const updateResult = await flightBookingCollections.updateOne(query, updateDoc);
+                res.send(updateResult);
+            }
         })
 
 
