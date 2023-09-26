@@ -97,15 +97,21 @@ async function run() {
             res.send(result);
         })
 
-        
+
         app.get('/bookedUserFlightTickets/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
+            console.log(query);
             const user = await flightBookingCollections.findOne(query);
+            if (!user) {
+                return res.send([]);
+            }
             const idsArr = user.ids;
+            const name = user.name;
             const objectIdsArr = idsArr.map(id => new ObjectId(id));
             const result = await flightTicketCollections.find({ _id: { $in: objectIdsArr } }).toArray();
-            res.send(result)
+            const data = {result, name}
+            res.send(data)
         })
 
 
