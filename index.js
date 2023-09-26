@@ -101,7 +101,6 @@ async function run() {
         app.get('/bookedUserFlightTickets/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
-            console.log(query);
             const user = await flightBookingCollections.findOne(query);
             if (!user) {
                 return res.send([]);
